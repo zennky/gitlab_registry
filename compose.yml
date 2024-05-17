@@ -1,0 +1,47 @@
+#version: '3.6'
+
+services:
+  gitlab:
+    #image: gitlab/gitlab-ce:latest
+    image: gitlab/gitlab-ce:nightly
+    restart: always
+    hostname: 'gitlab.example.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.example.com'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        registry_external_url 'https://registry.example.com'
+        gitlab_rails['registry_enabled'] = true
+        gitlab_rails['registry_host'] = "registry.example.com"
+        gitlab_rails['registry_api_url'] = "https://registry:5000"
+        gitlab_rails['registry_key_path'] = "/etc/gitlab/ssl/registry/gitlab-registry.key"
+        gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
+        gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab/gitlab.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab/gitlab.key"
+        nginx['listen_https'] = true
+    ports:
+      - '80:80'
+      - '443:443'
+      - '2222:22'
+    volumes:
+      - './config/gitlab:/etc/gitlab'
+      - './logs/gitlab:/var/log/gitlab'
+      - './data/gitlab:/var/opt/gitlab'
+      - './certs/gitlab:/etc/gitlab/ssl/gitlab'
+      - './certs/registry:/etc/gitlab/ssl/registry'
+
+  registry:
+    image: registry:2
+    restart: always
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_HTTP_SECRET: "a-very-secure-secret"
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/gitlab-registry.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/gitlab-registry.key
+    ports:
+      - '5000:5000'
+    volumes:
+      - './data/registry:/var/lib/registry'
+      - './certs/registry:/certs:ro'

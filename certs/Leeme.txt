@@ -1,0 +1,24 @@
+
+## 1. Crear directorio
+mkdir certs
+
+## 2. Crear certificado para GitLab
+openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/gitlab.key -x509 -days 365 -out certs/gitlab.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Department/CN=gitlab.example.com"
+
+## 3. Crear certificado para Docker Registry
+openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/gitlab-registry.key -x509 -days 365 -out certs/gitlab-registry.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Department/CN=registry.example.com"
+
+
+mkdir -p certs/gitlab
+mkdir -p certs/registry
+
+# Mover los certificados al directorio adecuado
+mv certs/gitlab.crt certs/gitlab/
+mv certs/gitlab.key certs/gitlab/
+mv certs/gitlab-registry.crt certs/registry/
+mv certs/gitlab-registry.key certs/registry/
+
+chmod 600 certs/gitlab/gitlab.key
+chmod 600 certs/gitlab/gitlab.crt
+chmod 600 certs/registry/gitlab-registry.key
+chmod 600 certs/registry/gitlab-registry.crt
