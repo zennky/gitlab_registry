@@ -14,11 +14,11 @@ services:
         gitlab_rails['registry_enabled'] = true
         gitlab_rails['registry_host'] = "registry.example.com"
         gitlab_rails['registry_api_url'] = "https://registry:5000"
-        gitlab_rails['registry_key_path'] = "/etc/gitlab/ssl/registry/gitlab-registry.key"
+        gitlab_rails['registry_key_path'] = "/etc/gitlab/ssl/registry/registry.example.com.key"
         gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
         gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
-        nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab/gitlab.crt"
-        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab/gitlab.key"
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab/gitlab.example.com.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab/gitlab.example.com.key"
         nginx['listen_https'] = true
     ports:
       - '80:80'
@@ -38,10 +38,12 @@ services:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
       REGISTRY_HTTP_ADDR: 0.0.0.0:5000
       REGISTRY_HTTP_SECRET: "a-very-secure-secret"
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/gitlab-registry.crt
-      REGISTRY_HTTP_TLS_KEY: /certs/gitlab-registry.key
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry/registry.example.com.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/registry/registry.example.com.key
     ports:
       - '5000:5000'
     volumes:
       - './data/registry:/var/lib/registry'
-      - './certs/registry:/certs:ro'
+      - './certs/registry:/certs'
+      - './certs/registry/registry.example.com.crt:/certs/registry/registry.example.com.crt'
+      - './certs/registry/registry.example.com.key:/certs/registry/registry.example.com.key'
